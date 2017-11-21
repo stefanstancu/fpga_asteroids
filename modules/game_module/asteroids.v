@@ -8,7 +8,7 @@
 module asteroids(
     input CLOCK_50,
     input [5:0] SW,
-    input [0:0] KEY,
+    input [3:0] KEY,
 
     // VGA ouputs
     output VGA_CLK,   						//	VGA Clock
@@ -55,6 +55,8 @@ module asteroids(
     defparam VGA.BACKGROUND_IMAGE = "black.mif";
 
     reg [8:0] pos_x, pos_y;
+    reg [5:0] direction;
+    wire [5:0] w_direction_out;
 
 	move_rate_divider mv_div(
 		.clk(CLOCK_50),
@@ -63,9 +65,19 @@ module asteroids(
 		.q(move_clk)
 	);
 
+    // rotation to direction decoder
+    directionModule dirmod(
+        .moveClock(move_clk),
+        .directionIn(direction),
+        .right(KEY[1]),
+        .left(KEY[3]),
+
+        .directionOut(w_direction_out)
+    );
+
     // Ship movement module
 	movementmodule m0(
-		.direction(SW[5:0]),
+		.direction(direction),
 		.reset_n(reset_n),
 		.move_clk(move_clk),
 		.clk(CLOCK_50),
@@ -83,7 +95,7 @@ module asteroids(
         .y_pos(pos_y),
         .plot(1'b1),
         .reset_n(reset_n),
-        .direction(SW[5:0]),
+        .direction(direction),
 
         .x(x),
         .y(y),
@@ -95,6 +107,7 @@ module asteroids(
 		if (reset_n) begin
 			pos_x <= 9'd0;
 			pos_y <= 9'd0;
+            direction <= 6'b000001;
 		end
 		else if (delta_x) begin
 			if (sign_x)
@@ -108,5 +121,6 @@ module asteroids(
 			else
 				pos_y <= pos_y + 1;
 		end
+        direction <= w_direction_out;
 	end
 endmodule

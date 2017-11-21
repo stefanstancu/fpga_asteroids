@@ -72,168 +72,168 @@ module draw_ship(
         .address(w_address),
         .q(w_data[0])
     );
-    defparam mem1.init_file = "sprite_mifs/0.mif";
+    defparam mem0.init_file = "draw_ship_module/sprite_mifs/0.mif";
 
     sprite_mem32x32 mem1(
         .clock(clk),
         .address(w_address),
         .q(w_data[1])
     );
-    defparam mem1.init_file = "sprite_mifs/1.mif";
+    defparam mem1.init_file = "draw_ship_module/sprite_mifs/1.mif";
 
     sprite_mem32x32 mem2(
         .clock(clk),
         .address(w_address),
         .q(w_data[2])
     );
-    defparam mem2.init_file = "sprite_mifs/2.mif";
+    defparam mem2.init_file = "draw_ship_module/sprite_mifs/2.mif";
 
     sprite_mem32x32 mem3(
         .clock(clk),
         .address(w_address),
         .q(w_data[3])
     );
-    defparam mem3.init_file = "sprite_mifs/3.mif";
+    defparam mem3.init_file = "draw_ship_module/sprite_mifs/3.mif";
 
     sprite_mem32x32 mem4(
         .clock(clk),
         .address(w_address),
         .q(w_data[4])
     );
-    defparam mem4.init_file = "sprite_mifs/4.mif";
+    defparam mem4.init_file = "draw_ship_module/sprite_mifs/4.mif";
 
     sprite_mem32x32 mem5(
         .clock(clk),
         .address(w_address),
         .q(w_data[5])
     );
-    defparam mem5.init_file = "sprite_mifs/5.mif";
+    defparam mem5.init_file = "draw_ship_module/sprite_mifs/5.mif";
 
     sprite_mem32x32 mem6(
         .clock(clk),
         .address(w_address),
         .q(w_data[6])
     );
-    defparam mem6.init_file = "sprite_mifs/0_90.mif";
+    defparam mem6.init_file = "draw_ship_module/sprite_mifs/0_90.mif";
 
     sprite_mem32x32 mem7(
         .clock(clk),
         .address(w_address),
         .q(w_data[7])
     );
-    defparam mem7.init_file = "sprite_mifs/1_90.mif";
+    defparam mem7.init_file = "draw_ship_module/sprite_mifs/1_90.mif";
 
     sprite_mem32x32 mem8(
         .clock(clk),
         .address(w_address),
         .q(w_data[8])
     );
-    defparam mem8.init_file = "sprite_mifs/2_90.mif";
+    defparam mem8.init_file = "draw_ship_module/sprite_mifs/2_90.mif";
 
     sprite_mem32x32 mem9(
         .clock(clk),
         .address(w_address),
         .q(w_data[9])
     );
-    defparam mem9.init_file = "sprite_mifs/3_90.mif";
+    defparam mem9.init_file = "draw_ship_module/sprite_mifs/3_90.mif";
 
     sprite_mem32x32 mem10(
         .clock(clk),
         .address(w_address),
         .q(w_data[10])
     );
-    defparam mem10.init_file = "sprite_mifs/4_90.mif";
+    defparam mem10.init_file = "draw_ship_module/sprite_mifs/4_90.mif";
 
     sprite_mem32x32 mem11(
         .clock(clk),
         .address(w_address),
         .q(w_data[11])
     );
-    defparam mem11.init_file = "sprite_mifs/5_90.mif";
+    defparam mem11.init_file = "draw_ship_module/sprite_mifs/5_90.mif";
 
     sprite_mem32x32 mem12(
         .clock(clk),
         .address(w_address),
         .q(w_data[12])
     );
-    defparam mem12.init_file = "sprite_mifs/0_180.mif";
+    defparam mem12.init_file = "draw_ship_module/sprite_mifs/0_180.mif";
 
     sprite_mem32x32 mem13(
         .clock(clk),
         .address(w_address),
         .q(w_data[13])
     );
-    defparam mem13.init_file = "sprite_mifs/1_180.mif";
+    defparam mem13.init_file = "draw_ship_module/sprite_mifs/1_180.mif";
 
     sprite_mem32x32 mem14(
         .clock(clk),
         .address(w_address),
         .q(w_data[14])
     );
-    defparam mem14.init_file = "sprite_mifs/2_180.mif";
+    defparam mem14.init_file = "draw_ship_module/sprite_mifs/2_180.mif";
 
     sprite_mem32x32 mem15(
         .clock(clk),
         .address(w_address),
         .q(w_data[15])
     );
-    defparam mem15.init_file = "sprite_mifs/3_180.mif";
+    defparam mem15.init_file = "draw_ship_module/sprite_mifs/3_180.mif";
 
     sprite_mem32x32 mem16(
         .clock(clk),
         .address(w_address),
         .q(w_data[16])
     );
-    defparam mem16.init_file = "sprite_mifs/4_180.mif";
+    defparam mem16.init_file = "draw_ship_module/sprite_mifs/4_180.mif";
 
     sprite_mem32x32 mem17(
         .clock(clk),
         .address(w_address),
         .q(w_data[17])
     );
-    defparam mem17.init_file = "sprite_mifs/5_180.mif";
+    defparam mem17.init_file = "draw_ship_module/sprite_mifs/5_180.mif";
 
     sprite_mem32x32 mem18(
         .clock(clk),
         .address(w_address),
         .q(w_data[18])
     );
-    defparam mem18.init_file = "sprite_mifs/0_270.mif";
+    defparam mem18.init_file = "draw_ship_module/sprite_mifs/0_270.mif";
 
     sprite_mem32x32 mem19(
         .clock(clk),
         .address(w_address),
         .q(w_data[19])
     );
-    defparam mem19.init_file = "sprite_mifs/1_270.mif";
+    defparam mem19.init_file = "draw_ship_module/sprite_mifs/1_270.mif";
 
     sprite_mem32x32 mem20(
         .clock(clk),
         .address(w_address),
         .q(w_data[20])
     );
-    defparam mem20.init_file = "sprite_mifs/2_270.mif";
+    defparam mem20.init_file = "draw_ship_module/sprite_mifs/2_270.mif";
 
     sprite_mem32x32 mem21(
         .clock(clk),
         .address(w_address),
         .q(w_data[21])
     );
-    defparam mem21.init_file = "sprite_mifs/3_270.mif";
+    defparam mem21.init_file = "draw_ship_module/sprite_mifs/3_270.mif";
 
     sprite_mem32x32 mem22(
         .clock(clk),
         .address(w_address),
         .q(w_data[22])
     );
-    defparam mem22.init_file = "sprite_mifs/4_270.mif";
+    defparam mem22.init_file = "draw_ship_module/sprite_mifs/4_270.mif";
 
     sprite_mem32x32 mem23(
         .clock(clk),
         .address(w_address),
         .q(w_data[23])
     );
-    defparam mem23.init_file = "sprite_mifs/5_270.mif";
+    defparam mem23.init_file = "draw_ship_module/sprite_mifs/5_270.mif";
 
     always@(*) begin
         if (!direction[5]) begin

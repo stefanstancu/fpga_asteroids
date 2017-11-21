@@ -1,4 +1,4 @@
-module test(moveClock, directionIn, right, left);
+module test_direction(moveClock, directionIn, right, left);
 
 	input [5:0] directionIn;
 	input moveClock;

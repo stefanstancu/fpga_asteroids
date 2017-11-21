@@ -1,6 +1,6 @@
 `timescale 1ps / 1ps
 
-module draw_ship(
+module draw_stroid(
     input clk,
     input [9:0] x_pos,
     input [9:0] y_pos,
@@ -347,7 +347,7 @@ module draw_ship(
     end
 endmodule
 
-module ship_draw_controller(
+module ship_stroid_controller(
     input clk,
     input [9:0] x_pos,
     input [9:0] y_pos,
@@ -437,7 +437,7 @@ module ship_draw_controller(
     end // state_FFs
 endmodule
 
-module ship_draw_datapath(
+module stroid_draw_datapath(
     input clk,
     input reset_n,
     input [9:0] x,
