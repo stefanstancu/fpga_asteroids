@@ -27,7 +27,7 @@ module draw_ship(
     // debug
     wire [2:0] state;
 
-    ship_draw_controller c0(
+    draw_controller c0(
         .clk(clk),
         .x_pos(x_pos),
         .y_pos(y_pos),
@@ -45,7 +45,7 @@ module draw_ship(
         .state(state)
     );
 
-    ship_draw_datapath d0(
+    draw_datapath #(5'd31)d0(
         .clk(clk),
         .reset_n(reset_n),
         .x(x_pos),
@@ -363,7 +363,7 @@ module draw_ship(
     end
 endmodule
 
-module ship_draw_controller(
+module draw_controller(
     input clk,
     input [9:0] x_pos,
     input [9:0] y_pos,
@@ -453,7 +453,7 @@ module ship_draw_controller(
     end // state_FFs
 endmodule
 
-module ship_draw_datapath(
+module draw_datapath(
     input clk,
     input reset_n,
     input [9:0] x,
@@ -474,6 +474,8 @@ module ship_draw_datapath(
     output reg [9:0] y_pix,
     output [2:0] color
 );
+    
+    parameter sprite_size = 5'd31;
 
     // counter registers
     reg [4:0] x_counter, y_counter;
@@ -488,8 +490,8 @@ module ship_draw_datapath(
     // register logic
     always@(posedge clk) begin
         if(reset_n) begin
-            x_counter <= 5'd31;
-            y_counter <= 5'd31;
+            x_counter <= sprite_size;
+            y_counter <= sprite_size;
             address <= 0;
         end
         else begin
@@ -498,9 +500,9 @@ module ship_draw_datapath(
             if(sub_y)
                 y_counter <= y_counter - 1;
             if(reset_x)
-                x_counter <= 5'd31;
+                x_counter <= sprite_size;
             if(reset_y)
-                y_counter <= 5'd31;
+                y_counter <= sprite_size;
             if(plot)
                 address <= address + 1;
             if (reset_x && reset_y)
@@ -510,7 +512,7 @@ module ship_draw_datapath(
 
     // position calculator
     always@(*) begin
-        x_pix <= x + (31 - x_counter);
-        y_pix <= y + (31 - y_counter);
+        x_pix <= x + (sprite_size - x_counter);
+        y_pix <= y + (sprite_size - y_counter);
     end
 endmodule
