@@ -246,7 +246,7 @@ module draw_ship(
                     4'b0011: sprite_data <= w_data[0];
                     // 18 deg
                     4'b0111: sprite_data <= w_data[1];
-                    // 22.5 deg
+                    // 23 deg
                     4'b0110: sprite_data <= w_data[2];
                     // 33 deg
                     4'b1011: sprite_data <= w_data[2];
@@ -279,7 +279,7 @@ module draw_ship(
                     // 26 deg
                     4'b0110: sprite_data <= w_data[8];
                     // 33 deg
-                    4'b0111: sprite_data <= w_data[8];
+                    4'b1011: sprite_data <= w_data[8];
                     // 45 deg
                     4'b0101: sprite_data <= w_data[9];
                     4'b1010: sprite_data <= w_data[9];
