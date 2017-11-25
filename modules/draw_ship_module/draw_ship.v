@@ -1,11 +1,9 @@
-`timescale 1ps / 1ps
+/*
+* Contains an instance of draw_sprite and all the ROMs + sprite mux to
+* draw the ship.
+*/
 
 module draw_ship(
-    /*
-    * Contains an instance of draw_sprite and all the ROMs + sprite mux to
-    * draw the ship.
-    */
-
     input clk,
     input [9:0] x_pos,
     input [9:0] y_pos,

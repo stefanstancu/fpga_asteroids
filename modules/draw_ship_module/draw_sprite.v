@@ -1,11 +1,11 @@
-module draw_sprite(
-    /*
-    *   Wrapper for drawing a sprite
-    *   Parameters:
-    *       sprite_size : the size of the sprite in pixels - 1
-    *                     assumes square sprite
-    */
+/*
+*   Wrapper for drawing a sprite
+*   Parameters:
+*       sprite_size : the size of the sprite in pixels - 1
+*                     assumes square sprite
+*/
 
+module draw_sprite(
     // Functional signals
     input clk,
     input reset_n,
@@ -20,8 +20,8 @@ module draw_sprite(
     output plot_out,
 
     // Data outputs
-    output reg [9:0] x_pix,
-    output reg [9:0] y_pix,
+    output [9:0] x_pix,
+    output [9:0] y_pix,
     output [9:0] address_out,
     output [2:0] color
 );
