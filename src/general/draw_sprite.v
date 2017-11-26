@@ -18,6 +18,7 @@ module draw_sprite(
 
     // Functional outputs
     output plot_out,
+    output draw_done,
 
     // Data outputs
     output [9:0] x_pix,
@@ -65,6 +66,7 @@ module draw_sprite(
         .y_count(w_y_count),
         .address_out(address_out),
         .plot_out(plot_out),
+        .draw_done(),
         .x_pix(x_pix),
         .y_pix(y_pix),
         .color(color)
@@ -97,7 +99,6 @@ module draw_controller(
     assign state = current_state;
 
     localparam S_WAIT       = 0,
-               S_RELEASE    = 1,
                S_PLOT       = 2,
                S_X          = 3,
                S_Y          = 4,
@@ -120,7 +121,9 @@ module draw_controller(
                 else
                     next_state = S_PLOT;
             end
-            S_RESET: next_state = S_PLOT;
+            S_RESET: begin
+                next_state = plot ? S_PLOT : S_RESET;
+            end
         endcase
     end //state_table
 
@@ -133,6 +136,7 @@ module draw_controller(
         reset_x = 1'b0;
         reset_y = 1'b0;
         plot_out = 1'b0;
+        draw_done = 1'b0;
 
         case(current_state)
             S_PLOT: begin
@@ -148,6 +152,7 @@ module draw_controller(
             S_RESET:begin
                 reset_x = 1'b1;
                 reset_y = 1'b1;
+                draw_done = 1'b1;
             end
         endcase
     end

@@ -1,55 +1,7 @@
-module test(
-	input [5:0] direction,
-	input reset_n,
-	input clk,
-
-	output reg [8:0] pos_x, pos_y
-	);
-
-	wire move_clk;
-	wire delta_x, delta_y, sign_x, sign_y;
-
-	move_rate_divider mv_div(
-		.clk(clk),
-		.reset_n(reset_n),
-
-		.q(move_clk)
-	);
-
-	movementmodule m0(
-		.direction(direction),
-		.reset_n(reset_n),
-		.move_clk(move_clk),
-		.clk(clk),
-
-		.delta_x(delta_x),
-		.delta_y(delta_y),
-		.sign_x(sign_x),
-		.sign_y(sign_y)
-	);
-
-
-
-	always @ (posedge move_clk or posedge reset_n) begin
-		if (reset_n) begin
-			pos_x <= 9'd0;
-			pos_y <= 9'd0;
-		end
-		else if (delta_x) begin
-			if (sign_x)
-				pos_x <= pos_x - 1;
-			else
-				pos_x <= pos_x + 1;
-		end
-		else if (delta_y) begin
-			if (sign_y)
-				pos_y <= pos_y - 1;
-			else
-				pos_y <= pos_y + 1;
-		end
-	end
-
-endmodule
+/*
+*   Decodes the move operation to be done on the position register given the 6 bit direction
+*   Performs once per move_clk
+*/
 
 module movementmodule(
 	input [5:0] direction,

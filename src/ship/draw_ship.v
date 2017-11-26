@@ -14,7 +14,6 @@ module draw_ship(
     output [9:0] x,
     output [9:0] y,
     output writeEn,
-    output [9:0] address,
     output [2:0] color
 );
 
