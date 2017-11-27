@@ -1,6 +1,6 @@
 // ECE241 Final Project
 // Stefan Stancu 1003153026
-// Bianca Esanu
+// Bianca Esanu 1003082139
 // *
 // * ASTEROIDS *
 // *
@@ -16,9 +16,9 @@ module asteroids(
     output VGA_VS,							//	VGA V_SYNC
     output VGA_BLANK_N,						//	VGA BLANK
     output VGA_SYNC_N,						//	VGA SYNC
-    output [7:0] VGA_R,   						//	VGA Red[9:0]
-    output [7:0] VGA_G,	 						//	VGA Green[9:0]
-    output [7:0] VGA_B  						//	VGA Blue[9:0]
+    output [7:0] VGA_R,   					//	VGA Red[9:0]
+    output [7:0] VGA_G,	 					//	VGA Green[9:0]
+    output [7:0] VGA_B  					//	VGA Blue[9:0]
 );
 
     wire reset_n;
@@ -54,9 +54,19 @@ module asteroids(
     defparam VGA.BITS_PER_COLOUR_CHANNEL = 1;
     defparam VGA.BACKGROUND_IMAGE = "black.mif";
 
-    reg [8:0] pos_x, pos_y;
-    reg [5:0] direction;
-    wire [5:0] w_direction_out;
+    // Logic Constants
+    localparam ENTITY_SIZE = 34;
+    // Set Counts Parameters
+    localparam MAX_SHIP         = 1,
+               MAX_ASTEROIDS    = 10,
+               MAX_SHOTS        = 10;
+
+    // Entity registers
+    reg [ENTITY_SIZE-1:0] ship;
+    reg [MAX_ASTEROIDS-1:0][ENTITY_SIZE-1:0] asteroids;
+    reg [MAX_SHOTS-1:0][ENTITY_SIZE-1:0] shots;
+
+    wire [5:0] w_ship_direction;
 
 	move_rate_divider mv_div(
 		.clk(CLOCK_50),
@@ -72,7 +82,7 @@ module asteroids(
         .right(KEY[1]),
         .left(KEY[3]),
 
-        .directionOut(w_direction_out)
+        .directionOut(w_ship_direction)
     );
 
     // Ship movement module
@@ -88,19 +98,17 @@ module asteroids(
 		.sign_y(sign_y)
 	);
 
-    //Draw ship module
-    draw_ship ds(
+    // Draw controller for all entities
+    draw_controller(
         .clk(CLOCK_50),
-        .x_pos(pos_x),
-        .y_pos(pos_y),
-        .plot(1'b1),
-        .reset_n(reset_n),
-        .direction(direction),
+        .ship_reg(ship),
+        .asteroid_reg(asteroids),
+        .shot_reg(shots),
 
         .x(x),
         .y(y),
-        .writeEn(writeEn),
-        .color(color)
+        .color(color),
+        .plot(writeEn)
     );
 
 	always @ (posedge move_clk or posedge reset_n) begin
@@ -121,6 +129,6 @@ module asteroids(
 			else
 				pos_y <= pos_y + 1;
 		end
-        direction <= w_direction_out;
+        direction <= w_ship_direction;
 	end
 endmodule

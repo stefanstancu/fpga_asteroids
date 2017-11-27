@@ -1,8 +1,108 @@
+/*
+* Controller for all drawing operations
+*/
+
 module draw_controller(
-    input draw_done,
+    input clk,
+    input [ENTITY_SIZE-1:0]ship_reg,
+    input [MAX_ASTEROIDS-1:0][ENTITY_SIZE-1:0] asteroid_reg,
+    input [MAX_SHOT-1:0][ENTITY_SIZE-1:0] shot_reg,
+
+    output reg [9:0] x,
+    output reg [9:0] y,
+    output reg [2:0] color,
+    output reg plot
+);
+
+    // Parameters
+    parameter ENTITY_SIZE       = 34,
+              MAX_ASTEROIDS     = 5,
+              MAX_SHOTS         = 10,
+              MAX_SHIPS         = 1;
+
+    // Wires
+    wire [2:0][9:0] w_x, w_y;
+    wire [2:0][2:0] w_color;
+    wire [2:0] w_writeEn, w_draw_done;
+    wire [ENTITY_SIZE-1:0] w_entity;
+    wire [2:0] w_entity_state;
+
+    // entity controller
+    entity_controller ec(
+        .draw_done(w_draw_done),
+        .ship_reg(ship_reg),
+        .asteroid_reg(asteroid_reg),
+        .shot_reg(shot_reg),
+
+        .entity(w_entity),
+        .entity_state_out(w_entity_state)
+    );
+    
+    // The sprite_drawing modules
+    draw_ship d_ship(
+        .clk(clk),
+        .x_pos(w_entity[15:6]),
+        .y_pos(w_entity[25:6]),
+        .plot(w_entity_state[33]),
+        .reset_n(reset_n),
+        .direction(w_entity[5:0]),
+
+        .x(w_x[2]),
+        .y(w_y[2]),
+        .writeEn(w_writeEn[2]),
+        .color(w_color[2]),
+        .draw_done(w_draw_done[2])
+    );
+
+    draw_asteroid d_asteroid(
+        .clk(clk),
+        .x_pos(w_entity[15:6]),
+        .y_pos(w_entity[25:6]),
+        .plot(w_entity[33]),
+        .reset_n(reset_n),
+        .sprite_sel(w_entity[32:30]),
+
+        .x(w_x[1]),
+        .y(w_y[1]),
+        .writEn(w_writeEn[1]),
+        .color(w_color[1]),
+        .draw_done(w_draw_done[1])
+    );
+
+    // Draw shot
+    // Module to be added
+
+    // Mux behaviour
+    always@(*) begin
+        case(entity_state)
+            D_SHIP:begin
+                x <= w_x[2];
+                y <= w_y[2];
+                color <= w_color[2];
+                writeEn <= w_writeEn[2];
+            end
+            D_ASTEROID:begin
+                x <= w_x[1];
+                y <= w_y[1];
+                color <= w_color[1];
+                writeEn <= w_writeEn[1];
+            end
+            D_SHOT: begin
+                x <= w_x[0];
+                y <= w_y[0];
+                color <= w_color[0];
+                writeEn <= w_writeEn[0];
+            end
+        endcase
+    end
+
+endmodule
+
+module entity_controller(
+    input [2:0] draw_done,
     input [29:0]ship_reg,
-    input [MAX_ASTEROIDS:0][29:0] asteroid_reg,
-    input [MAX_SHOT:0][29:0] shot_reg,
+    input [MAX_ASTEROIDS-1:0][29:0] asteroid_reg,
+    input [MAX_SHOT-1:0][29:0] shot_reg,
 
     output [29:0] entity,
     output [2:0] entity_state_out
@@ -32,6 +132,8 @@ module draw_controller(
                D_ASTEROID   = 3'b010,
                D_SHOT       = 3'b001;
 
+    integer e_state = 0;
+
     // State Table
     always@(*) begin: state_table
         case(current_state)
@@ -39,7 +141,7 @@ module draw_controller(
                 next_state = S_DRAW_WAIT;
             end
             S_DRAW: begin
-                if (draw_done)
+                if (draw_done[e_state])
                     next_state = S_DRAW_INC_ASTR;
                 else
                     next_state = S_DRAW_WAIT;
@@ -80,6 +182,13 @@ module draw_controller(
                 entity <= shot_reg[shot_counter];
             end
             default: entity <= 30'd0;
+        endcase
+
+        // entity_state to index decoder
+        case(entity_state):
+            D_SHIP: e_state = 2;
+            D_ASTEROID: e_state = 1;
+            D_SHOT: e_state = 0;
         endcase
     end
 
