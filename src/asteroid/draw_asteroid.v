@@ -26,9 +26,9 @@ module draw_asteroid(
         .plot(plot),
         .x_pos(x_pos),
         .y_pos(y_pos),
-        .sprite_pixel_data(color),
+        .sprite_pixel_data(w_data),
 
-        .plot_out(writEn),
+        .plot_out(writeEn),
         .x_pix(x),
         .y_pix(y),
         .address_out(address),

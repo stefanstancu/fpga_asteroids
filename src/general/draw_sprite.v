@@ -34,7 +34,7 @@ module draw_sprite(
     wire [4:0] w_x_count, w_y_count;
     wire w_sub_x, w_sub_y, w_reset_x, w_reset_y, w_plot;
 
-    draw_controller controller(
+    sprite_draw_controller controller(
         .clk(clk),
         .x_pos(x_pos),
         .y_pos(y_pos),
@@ -74,7 +74,7 @@ module draw_sprite(
 
 endmodule
 
-module draw_controller(
+module sprite_draw_controller(
     input clk,
     input [9:0] x_pos,
     input [9:0] y_pos,
@@ -88,6 +88,7 @@ module draw_controller(
     output reg reset_x,
     output reg reset_y,
     output reg plot_out,
+    output reg draw_done,
 
     // debug
     output [2:0] state

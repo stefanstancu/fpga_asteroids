@@ -6,7 +6,7 @@ module draw_controller(
     input clk,
     input [ENTITY_SIZE-1:0]ship_reg,
     input [MAX_ASTEROIDS-1:0][ENTITY_SIZE-1:0] asteroid_reg,
-    input [MAX_SHOT-1:0][ENTITY_SIZE-1:0] shot_reg,
+    input [MAX_SHOTS-1:0][ENTITY_SIZE-1:0] shot_reg,
 
     output reg [9:0] x,
     output reg [9:0] y,
@@ -15,6 +15,10 @@ module draw_controller(
 );
 
     // Parameters
+    localparam D_SHIP       = 3'b100,
+               D_ASTEROID   = 3'b010,
+               D_SHOT       = 3'b001;
+
     parameter ENTITY_SIZE       = 34,
               MAX_ASTEROIDS     = 5,
               MAX_SHOTS         = 10,
@@ -29,6 +33,8 @@ module draw_controller(
 
     // entity controller
     entity_controller ec(
+        .clk(CLOCK_50),
+        .reset_n(reset_n),
         .draw_done(w_draw_done),
         .ship_reg(ship_reg),
         .asteroid_reg(asteroid_reg),
@@ -43,7 +49,7 @@ module draw_controller(
         .clk(clk),
         .x_pos(w_entity[15:6]),
         .y_pos(w_entity[25:6]),
-        .plot(w_entity_state[33]),
+        .plot(w_entity[33]),
         .reset_n(reset_n),
         .direction(w_entity[5:0]),
 
@@ -64,7 +70,7 @@ module draw_controller(
 
         .x(w_x[1]),
         .y(w_y[1]),
-        .writEn(w_writeEn[1]),
+        .writeEn(w_writeEn[1]),
         .color(w_color[1]),
         .draw_done(w_draw_done[1])
     );
@@ -74,24 +80,24 @@ module draw_controller(
 
     // Mux behaviour
     always@(*) begin
-        case(entity_state)
+        case(w_entity_state)
             D_SHIP:begin
                 x <= w_x[2];
                 y <= w_y[2];
                 color <= w_color[2];
-                writeEn <= w_writeEn[2];
+                plot <= w_writeEn[2];
             end
             D_ASTEROID:begin
                 x <= w_x[1];
                 y <= w_y[1];
                 color <= w_color[1];
-                writeEn <= w_writeEn[1];
+                plot <= w_writeEn[1];
             end
             D_SHOT: begin
                 x <= w_x[0];
                 y <= w_y[0];
                 color <= w_color[0];
-                writeEn <= w_writeEn[0];
+                plot <= w_writeEn[0];
             end
         endcase
     end
@@ -99,17 +105,20 @@ module draw_controller(
 endmodule
 
 module entity_controller(
+    input clk,
+    input reset_n,
     input [2:0] draw_done,
-    input [29:0]ship_reg,
-    input [MAX_ASTEROIDS-1:0][29:0] asteroid_reg,
-    input [MAX_SHOT-1:0][29:0] shot_reg,
+    input [ENTITY_SIZE-1:0]ship_reg,
+    input [MAX_ASTEROIDS-1:0][ENTITY_SIZE-1:0] asteroid_reg,
+    input [MAX_SHOTS-1:0][ENTITY_SIZE-1:0] shot_reg,
 
-    output [29:0] entity,
+    output reg [29:0] entity,
     output [2:0] entity_state_out
 );
 
     // Parameters
-    parameter MAX_ASTEROIDS     = 5,
+    parameter ENTITY_SIZE       = 34,
+              MAX_ASTEROIDS     = 5,
               MAX_SHOTS         = 10,
               MAX_SHIPS         = 1;
 
@@ -125,7 +134,7 @@ module entity_controller(
 
     localparam S_DRAW       = 0,
                S_DRAW_WAIT  = 1,
-               S_INC_ASTR   = 2,
+               S_INC        = 2,
                S_RESET      = 3;
 
     localparam D_SHIP       = 3'b100,
@@ -140,13 +149,13 @@ module entity_controller(
             S_DRAW: begin
                 next_state = S_DRAW_WAIT;
             end
-            S_DRAW: begin
+            S_DRAW_WAIT: begin
                 if (draw_done[e_state])
-                    next_state = S_DRAW_INC_ASTR;
+                    next_state = S_INC;
                 else
                     next_state = S_DRAW_WAIT;
             end
-            S_INC_ASTR: begin
+            S_INC: begin
                 if (shot_counter >= MAX_SHOTS)
                     next_state = S_RESET;
                 else
@@ -155,7 +164,8 @@ module entity_controller(
             S_RESET: begin
                 next_state = S_DRAW;
             end
-            default: current_state <= S_RESET;
+            default: next_state <= S_RESET;
+        endcase
     end // state_table
 
     // Output Logic
@@ -166,12 +176,12 @@ module entity_controller(
             entity_state <= D_SHIP;
         else if (asteroid_counter < MAX_ASTEROIDS)
             entity_state <= D_ASTEROID;
-        else if (shot < MAX_SHOTS)
+        else if (shot_counter < MAX_SHOTS)
             entity_state <= D_SHOT;
         else
             entity_state <= 3'b000;
 
-        case(entity_state):
+        case(entity_state)
             D_SHIP: begin
                 entity <= ship_reg;
             end
@@ -185,19 +195,42 @@ module entity_controller(
         endcase
 
         // entity_state to index decoder
-        case(entity_state):
+        case(entity_state)
             D_SHIP: e_state = 2;
             D_ASTEROID: e_state = 1;
             D_SHOT: e_state = 0;
         endcase
     end
 
-    // State Transitions
     always@(posedge clk) begin: state_FFs
+        // State Transitions
         if(reset_n)
             current_state <= S_RESET;
         else
             current_state <= next_state;
+
+        // Counters
+        case(current_state)
+            S_DRAW: begin
+                
+            end
+            S_DRAW_WAIT: begin
+                
+            end
+            S_INC: begin
+                if (ship_counter < MAX_SHIPS)
+                    ship_counter = ship_counter + 1;
+                else if (asteroid_counter < MAX_ASTEROIDS)
+                    asteroid_counter = asteroid_counter + 1; 
+                else if (shot_counter < MAX_SHOTS)
+                    shot_counter = shot_counter + 1;
+            end
+            S_RESET: begin
+                ship_counter = 0;
+                asteroid_counter = 0;
+                shot_counter = 0;
+            end
+        endcase
     end
 endmodule
 

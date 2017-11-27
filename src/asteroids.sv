@@ -78,7 +78,7 @@ module asteroids(
     // rotation to direction decoder
     directionModule dirmod(
         .moveClock(move_clk),
-        .directionIn(direction),
+        .directionIn(ship[5:0]),
         .right(KEY[1]),
         .left(KEY[3]),
 
@@ -87,7 +87,7 @@ module asteroids(
 
     // Ship movement module
 	movementmodule m0(
-		.direction(direction),
+		.direction(ship[5:0]),
 		.reset_n(reset_n),
 		.move_clk(move_clk),
 		.clk(CLOCK_50),
@@ -99,7 +99,7 @@ module asteroids(
 	);
 
     // Draw controller for all entities
-    draw_controller(
+    draw_controller dc(
         .clk(CLOCK_50),
         .ship_reg(ship),
         .asteroid_reg(asteroids),
@@ -113,22 +113,22 @@ module asteroids(
 
 	always @ (posedge move_clk or posedge reset_n) begin
 		if (reset_n) begin
-			pos_x <= 9'd0;
-			pos_y <= 9'd0;
-            direction <= 6'b000001;
+			ship[15:6] <= 10'd0;
+			ship[25:16] <= 10'd0;
+            ship[5:0] <= 6'b000001;
 		end
 		else if (delta_x) begin
 			if (sign_x)
-				pos_x <= pos_x - 1;
+				ship[15:6] <= ship[15:6] - 1;
 			else
-				pos_x <= pos_x + 1;
+				ship[15:6] <= ship[15:6] + 1;
 		end
 		else if (delta_y) begin
 			if (sign_y)
-				pos_y <= pos_y - 1;
+				ship[25:16] <= ship[25:16]- 1;
 			else
-				pos_y <= pos_y + 1;
+				ship[25:16] <= ship[25:16]+ 1;
 		end
-        direction <= w_ship_direction;
+        ship[5:0] <= w_ship_direction;
 	end
 endmodule
