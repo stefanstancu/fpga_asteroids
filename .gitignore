@@ -1,2 +1,5 @@
 *.idea/
 *quartus_project/
+*.ver
+*.wlf
+*work/

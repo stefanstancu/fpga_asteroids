@@ -8,13 +8,13 @@ module draw_asteroid(
     input [9:0] y_pos,
     input plot,
     input reset_n,
-    input [5:0] direction,
     input [2:0] sprite_sel,
 
     output [9:0] x,
     output [9:0] y,
     output writeEn,
-    output [2:0] color
+    output [2:0] color,
+    output draw_done
 );
 
     wire [9:0] w_address;
@@ -26,13 +26,14 @@ module draw_asteroid(
         .plot(plot),
         .x_pos(x_pos),
         .y_pos(y_pos),
-        .sprite_pixel_data(color),
+        .sprite_pixel_data(w_data),
 
-        .plot_out(writEn),
+        .plot_out(writeEn),
         .x_pix(x),
         .y_pix(y),
-        .address_out(address),
-        .color(color)
+        .address_out(w_address),
+        .color(color),
+        .draw_done(draw_done)
     );
 
     sprite_mem32x32 #(.init_file("../asteroid/sprites/asteroid.mif")) mem0(

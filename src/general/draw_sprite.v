@@ -24,7 +24,11 @@ module draw_sprite(
     output [9:0] x_pix,
     output [9:0] y_pix,
     output [9:0] address_out,
-    output [2:0] color
+    output [2:0] color,
+
+    // Debug
+    output [2:0] state_out
+
 );
 
     // Parameters
@@ -34,7 +38,7 @@ module draw_sprite(
     wire [4:0] w_x_count, w_y_count;
     wire w_sub_x, w_sub_y, w_reset_x, w_reset_y, w_plot;
 
-    draw_controller controller(
+    sprite_draw_controller controller(
         .clk(clk),
         .x_pos(x_pos),
         .y_pos(y_pos),
@@ -47,10 +51,12 @@ module draw_sprite(
         .sub_y(w_sub_y),
         .reset_x(w_reset_x),
         .reset_y(w_reset_y),
-        .plot_out(w_plot)
+        .plot_out(w_plot),
+        .draw_done(draw_done),
+        .state(state_out)
     );
 
-    draw_datapath datapath(
+    draw_datapath #(.sprite_size(sprite_size)) datapath(
         .clk(clk),
         .reset_n(reset_n),
         .x(x_pos),
@@ -66,7 +72,6 @@ module draw_sprite(
         .y_count(w_y_count),
         .address_out(address_out),
         .plot_out(plot_out),
-        .draw_done(),
         .x_pix(x_pix),
         .y_pix(y_pix),
         .color(color)
@@ -74,7 +79,7 @@ module draw_sprite(
 
 endmodule
 
-module draw_controller(
+module sprite_draw_controller(
     input clk,
     input [9:0] x_pos,
     input [9:0] y_pos,
@@ -88,9 +93,10 @@ module draw_controller(
     output reg reset_x,
     output reg reset_y,
     output reg plot_out,
+    output reg draw_done,
 
     // debug
-    output [2:0] state
+    output [2:0]state
 );
 
     reg [2:0] current_state, next_state;
@@ -124,6 +130,7 @@ module draw_controller(
             S_RESET: begin
                 next_state = plot ? S_PLOT : S_RESET;
             end
+            default: next_state = S_RESET;
         endcase
     end //state_table
 
@@ -140,7 +147,7 @@ module draw_controller(
 
         case(current_state)
             S_PLOT: begin
-                plot_out = 1'b1;
+                plot_out = plot;
             end
             S_X: begin
                 sub_x = 1'b1;
@@ -161,7 +168,7 @@ module draw_controller(
     always@(posedge clk)
     begin: state_FFs
         if(reset_n)
-            current_state <= S_WAIT;
+            current_state <= S_RESET;
         else
             current_state <= next_state;
     end // state_FFs

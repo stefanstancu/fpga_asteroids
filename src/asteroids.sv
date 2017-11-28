@@ -1,6 +1,6 @@
 // ECE241 Final Project
 // Stefan Stancu 1003153026
-// Bianca Esanu
+// Bianca Esanu 1003082139
 // *
 // * ASTEROIDS *
 // *
@@ -16,9 +16,9 @@ module asteroids(
     output VGA_VS,							//	VGA V_SYNC
     output VGA_BLANK_N,						//	VGA BLANK
     output VGA_SYNC_N,						//	VGA SYNC
-    output [7:0] VGA_R,   						//	VGA Red[9:0]
-    output [7:0] VGA_G,	 						//	VGA Green[9:0]
-    output [7:0] VGA_B  						//	VGA Blue[9:0]
+    output [7:0] VGA_R,   					//	VGA Red[9:0]
+    output [7:0] VGA_G,	 					//	VGA Green[9:0]
+    output [7:0] VGA_B  					//	VGA Blue[9:0]
 );
 
     wire reset_n;
@@ -54,9 +54,27 @@ module asteroids(
     defparam VGA.BITS_PER_COLOUR_CHANNEL = 1;
     defparam VGA.BACKGROUND_IMAGE = "black.mif";
 
-    reg [8:0] pos_x, pos_y;
-    reg [5:0] direction;
-    wire [5:0] w_direction_out;
+    // Logic Constants
+    localparam ENTITY_SIZE = 34;
+    // Set Counts Parameters
+    localparam MAX_SHIPS        = 1,
+               MAX_ASTEROIDS    = 3,
+               MAX_SHOTS        = 3;
+
+    // Entity registers
+    reg [ENTITY_SIZE-1:0] ship = 34'b1000000000000000000000000000000001;
+    reg [MAX_ASTEROIDS-1:0][ENTITY_SIZE-1:0] asteroids;
+    reg [MAX_SHOTS-1:0][ENTITY_SIZE-1:0] shots;
+
+    assign asteroids[0] = 34'b1_000_00_00_0000110010_0000000000_000001;
+    assign asteroids[1] = 34'b1_000_00_00_0001100110_0001100110_000001;
+    assign asteroids[2] = 0;
+
+    assign shots[0] = 34'b1_000_00_00_0000000000_0001100110_000001;
+    assign shots[1] = 34'b1_000_00_00_0001100110_0000000000_000001;
+    assign shots[2] = 0;
+
+    wire [5:0] w_ship_direction;
 
 	move_rate_divider mv_div(
 		.clk(CLOCK_50),
@@ -68,16 +86,16 @@ module asteroids(
     // rotation to direction decoder
     directionModule dirmod(
         .moveClock(move_clk),
-        .directionIn(direction),
+        .directionIn(ship[5:0]),
         .right(KEY[1]),
         .left(KEY[3]),
 
-        .directionOut(w_direction_out)
+        .directionOut(w_ship_direction)
     );
 
     // Ship movement module
 	movementmodule m0(
-		.direction(direction),
+		.direction(ship[5:0]),
 		.reset_n(reset_n),
 		.move_clk(move_clk),
 		.clk(CLOCK_50),
@@ -88,39 +106,58 @@ module asteroids(
 		.sign_y(sign_y)
 	);
 
-    //Draw ship module
-    draw_ship ds(
+    // Draw controller for all entities
+    draw_controller #(
+        .ENTITY_SIZE(ENTITY_SIZE),
+        .MAX_SHIPS(MAX_SHIPS),
+        .MAX_SHOTS(MAX_SHOTS),
+        .MAX_ASTEROIDS(MAX_ASTEROIDS)
+    )dc(
         .clk(CLOCK_50),
-        .x_pos(pos_x),
-        .y_pos(pos_y),
+        .ship(ship),
+        .asteroids(asteroids),
+        .shots(shots),
+
+        .x(x),
+        .y(y),
+        .color(color),
+        .plot(writeEn)
+    );
+    
+/*
+    draw_ship test_draw_ship(
+        .clk(CLOCK_50),
+        .x_pos(ship[15:6]),
+        .y_pos(ship[25:16]),
         .plot(1'b1),
         .reset_n(reset_n),
-        .direction(direction),
+        .direction(ship[5:0]),
 
         .x(x),
         .y(y),
         .writeEn(writeEn),
         .color(color)
     );
+    */
 
 	always @ (posedge move_clk or posedge reset_n) begin
 		if (reset_n) begin
-			pos_x <= 9'd0;
-			pos_y <= 9'd0;
-            direction <= 6'b000001;
+			ship[15:6] <= 10'd0;
+			ship[25:16] <= 10'd0;
+            ship[5:0] <= 6'b000001;
 		end
 		else if (delta_x) begin
 			if (sign_x)
-				pos_x <= pos_x - 1;
+				ship[15:6] <= ship[15:6] - 1;
 			else
-				pos_x <= pos_x + 1;
+				ship[15:6] <= ship[15:6] + 1;
 		end
 		else if (delta_y) begin
 			if (sign_y)
-				pos_y <= pos_y - 1;
+				ship[25:16] <= ship[25:16] - 1;
 			else
-				pos_y <= pos_y + 1;
+				ship[25:16] <= ship[25:16] + 1;
 		end
-        direction <= w_direction_out;
+        ship[5:0] <= w_ship_direction;
 	end
 endmodule
