@@ -17,6 +17,8 @@ module draw_asteroid(
     output draw_done
 );
 
+    assign color = 3'b101;
+    
     wire [9:0] w_address;
     wire [2:0] w_data;
 
@@ -32,7 +34,7 @@ module draw_asteroid(
         .x_pix(x),
         .y_pix(y),
         .address_out(w_address),
-        .color(color),
+        .color(),
         .draw_done(draw_done)
     );
 

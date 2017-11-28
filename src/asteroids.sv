@@ -57,7 +57,7 @@ module asteroids(
     // Logic Constants
     localparam ENTITY_SIZE = 34;
     // Set Counts Parameters
-    localparam MAX_SHIP         = 1,
+    localparam MAX_SHIPS        = 1,
                MAX_ASTEROIDS    = 10,
                MAX_SHOTS        = 10;
 
@@ -99,7 +99,12 @@ module asteroids(
 	);
 
     // Draw controller for all entities
-    draw_controller dc(
+    draw_controller #(
+        .ENTITY_SIZE(ENTITY_SIZE),
+        .MAX_SHIPS(MAX_SHIPS),
+        .MAX_SHOTS(MAX_SHOTS),
+        .MAX_ASTEROIDS(MAX_ASTEROIDS)
+    )dc(
         .clk(CLOCK_50),
         .ship_reg(ship),
         .asteroid_reg(asteroids),

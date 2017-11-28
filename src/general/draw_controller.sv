@@ -2,7 +2,7 @@
 * Controller for all drawing operations
 */
 
-module draw_controller(clk, reset_n, ship_reg, asteroid_reg, shot_reg, x, y, color, plot, state, draw_done, draw_ship_state, entity_state, color_out
+module draw_controller(clk, reset_n, ship_reg, asteroid_reg, shot_reg, x, y, color, plot, state, draw_done, draw_ship_state, entity_state, color_out, ec_entity, mif_data, mif_address
 );
     parameter ENTITY_SIZE       = 34,
               MAX_ASTEROIDS     = 5,
@@ -24,6 +24,9 @@ module draw_controller(clk, reset_n, ship_reg, asteroid_reg, shot_reg, x, y, col
     output [2:0] draw_done;
     output [2:0] entity_state;
     output [2:0][2:0] color_out;
+    output [ENTITY_SIZE-1:0] ec_entity;
+    output [23:0][2:0] mif_data;
+    output [9:0] mif_address;
 
     // Parameters
     localparam D_SHIP       = 3'b100,
@@ -43,6 +46,7 @@ module draw_controller(clk, reset_n, ship_reg, asteroid_reg, shot_reg, x, y, col
     assign entity_state = w_entity_state;
     
     assign color_out = w_color;
+    assign ec_entity = w_entity;
 
     // entity controller
     entity_controller #(
@@ -73,12 +77,13 @@ module draw_controller(clk, reset_n, ship_reg, asteroid_reg, shot_reg, x, y, col
         .reset_n(reset_n),
         .direction(w_entity[5:0]),
 
-        .x(x),
-        .y(y),
-        .writeEn(writeEn),
-        .color(color),
+        .x(w_x[2]),
+        .y(w_y[2]),
+        .writeEn(w_writeEn[2]),
+        .color(w_color[2]),
         .draw_done(w_draw_done[2]),
-        .state(draw_ship_state)
+        .state(draw_ship_state),
+        .mif_address(mif_address)
     );
 
     draw_asteroid d_asteroid(
@@ -100,8 +105,7 @@ module draw_controller(clk, reset_n, ship_reg, asteroid_reg, shot_reg, x, y, col
     // Module to be added
 
     // Mux behaviour
-    /*
-    always@(*) begin
+    always@(posedge clk) begin
         case(w_entity_state)
             D_SHIP:begin
                 x <= w_x[2];
@@ -121,9 +125,14 @@ module draw_controller(clk, reset_n, ship_reg, asteroid_reg, shot_reg, x, y, col
                 color <= w_color[0];
                 plot <= w_writeEn[0];
             end
+            default: begin
+                x <= w_x[2];
+                y <= w_y[2];
+                color <= w_color[2];
+                plot <= w_writeEn[2];
+            end
         endcase
     end
-    */
 
 endmodule
 
@@ -142,7 +151,10 @@ module test_draw_controller(
               MAX_SHIPS = 1;
 
     wire [2:0] w_state, w_draw_done, w_draw_ship_state, w_entity_state;
+    wire [ENTITY_SIZE-1:0] w_ec_entity;
     wire [2:0][2:0] w_color;
+    wire [23:0][2:0] w_mif_data;
+    wire [9:0] w_mif_address;
 
     reg [ENTITY_SIZE-1:0] ship;
     reg [MAX_ASTEROIDS-1:0][ENTITY_SIZE-1:0] asteroids;
@@ -168,12 +180,15 @@ module test_draw_controller(
         .draw_done(w_draw_done),
         .draw_ship_state(w_draw_ship_state),
         .entity_state(w_entity_state),
-        .color_out(w_color)
+        .color_out(w_color),
+        .ec_entity(w_ec_entity),
+        .mif_data(w_mif_data),
+        .mif_address(w_mif_address)
     );
 
     always@(posedge clk) begin
         if (reset_n) begin
-            ship <= 34'b1000000000000000000000000000001000;
+            ship <= 34'b1000000000000000000000000000001001;
             shots <= 0;
             asteroids <= 0;
         end
