@@ -1,9 +1,7 @@
-module test_shots #(parameter SHOT_COUNT = 10, 
+//`define SHOT_COUNT 10
+module test_shots #(parameter SHOT_COUNT = 10,
             ENTITY_SIZE = 34)
-
-(   input clk,
-    output [SHOT_COUNT-1:0][ENTITY_SIZE-1:0] w_data
-    );
+				(input clk, output [SHOT_COUNT-1:0][ENTITY_SIZE-1:0] w_data);
 
 
 	shot_controller u1(
@@ -13,12 +11,13 @@ module test_shots #(parameter SHOT_COUNT = 10,
       .clk(clk),
       .xtip(10'b0000010000),
       .ytip(10'b0000011111),
-		  .entity_byte(3'b000),
+		.entity_byte(3'b000),
+
+
       .delete_shot(1'b0),
       .shot_address(shot_address),
-		  .shots_data(w_data)
+		.shots_data(w_data)
     );
-
 endmodule
 
 module shot_controller
@@ -38,8 +37,8 @@ module shot_controller
   output reg [SHOT_COUNT-1:0][ENTITY_SIZE-1:0] shots_data
 );
 
-	always@(posedge clk)
-	begin
+
+	always@(posedge clk) begin
 
 		if (reset_n) begin
 			shots_data <= (SHOT_COUNT)*34'd0;
@@ -53,14 +52,17 @@ module shot_controller
 			integer i;
 			for(i=0; i<SHOT_COUNT;i=i+1) begin
 
-				if(shots_data[i][33]==1'b0)
+				if(shots_data[i][33]==1'b0) begin
 					shots_data[i]<={1'b1, entity_byte [2:0], direction [4:3], direction [1:0], ytip [9:0], xtip [9:0], direction [5:0]};
 					break;
+				end
 			end
-
 		end
 
+
 		for(integer i=0; i<SHOT_COUNT;i=i+1) begin
+
+			if (shots_data[i][33]==1'b1) begin
 
 				//if both x and y are 0
 				if(shots_data[i][27:26]==2'b0 && shots_data[i][29:28]==2'b0) begin
@@ -78,7 +80,6 @@ module shot_controller
 						shots_data[i][15:6]<=shots_data[i][15:6]+1;
 
 					shots_data[i][27:26]<=shots_data[i][27:26]-1;
-
 					end
 
 				//if y is not 0
@@ -92,6 +93,7 @@ module shot_controller
 
 					shots_data[i][29:28]<=shots_data[i][29:28]-1;
 			    end
+			end
 		end
 	end
 
