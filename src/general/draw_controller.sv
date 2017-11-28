@@ -2,27 +2,30 @@
 * Controller for all drawing operations
 */
 
-module draw_controller(
-    input clk,
-    input [ENTITY_SIZE-1:0]ship_reg,
-    input [MAX_ASTEROIDS-1:0][ENTITY_SIZE-1:0] asteroid_reg,
-    input [MAX_SHOTS-1:0][ENTITY_SIZE-1:0] shot_reg,
-
-    output reg [9:0] x,
-    output reg [9:0] y,
-    output reg [2:0] color,
-    output reg plot
+module draw_controller(clk, reset_n, ship_reg, asteroid_reg, shot_reg, x, y, color, plot, state
 );
+    parameter ENTITY_SIZE       = 34,
+              MAX_ASTEROIDS     = 5,
+              MAX_SHOTS         = 10,
+              MAX_SHIPS         = 1;
+
+    input clk;
+    input reset_n;
+    input [ENTITY_SIZE-1:0]ship_reg;
+    input [MAX_ASTEROIDS-1:0][ENTITY_SIZE-1:0] asteroid_reg;
+    input [MAX_SHOTS-1:0][ENTITY_SIZE-1:0] shot_reg;
+
+    output reg [9:0] x;
+    output reg [9:0] y;
+    output reg [2:0] color;
+    output reg plot;
+    output [2:0] state;
 
     // Parameters
     localparam D_SHIP       = 3'b100,
                D_ASTEROID   = 3'b010,
                D_SHOT       = 3'b001;
 
-    parameter ENTITY_SIZE       = 34,
-              MAX_ASTEROIDS     = 5,
-              MAX_SHOTS         = 10,
-              MAX_SHIPS         = 1;
 
     // Wires
     wire [2:0][9:0] w_x, w_y;
@@ -32,7 +35,13 @@ module draw_controller(
     wire [2:0] w_entity_state;
 
     // entity controller
-    entity_controller ec(
+    entity_controller #(
+        .ENTITY_SIZE(ENTITY_SIZE),
+        .MAX_ASTEROIDS(MAX_ASTEROIDS),
+        .MAX_SHIPS(MAX_SHIPS),
+        .MAX_SHOTS(MAX_SHOTS)
+    )
+    ec(
         .clk(CLOCK_50),
         .reset_n(reset_n),
         .draw_done(w_draw_done),
@@ -41,14 +50,15 @@ module draw_controller(
         .shot_reg(shot_reg),
 
         .entity(w_entity),
-        .entity_state_out(w_entity_state)
+        .entity_state_out(w_entity_state),
+        .state(state)
     );
     
     // The sprite_drawing modules
     draw_ship d_ship(
         .clk(clk),
         .x_pos(w_entity[15:6]),
-        .y_pos(w_entity[25:6]),
+        .y_pos(w_entity[25:16]),
         .plot(w_entity[33]),
         .reset_n(reset_n),
         .direction(w_entity[5:0]),
@@ -63,7 +73,7 @@ module draw_controller(
     draw_asteroid d_asteroid(
         .clk(clk),
         .x_pos(w_entity[15:6]),
-        .y_pos(w_entity[25:6]),
+        .y_pos(w_entity[25:16]),
         .plot(w_entity[33]),
         .reset_n(reset_n),
         .sprite_sel(w_entity[32:30]),
@@ -104,23 +114,24 @@ module draw_controller(
 
 endmodule
 
-module entity_controller(
-    input clk,
-    input reset_n,
-    input [2:0] draw_done,
-    input [ENTITY_SIZE-1:0]ship_reg,
-    input [MAX_ASTEROIDS-1:0][ENTITY_SIZE-1:0] asteroid_reg,
-    input [MAX_SHOTS-1:0][ENTITY_SIZE-1:0] shot_reg,
-
-    output reg [29:0] entity,
-    output [2:0] entity_state_out
+module entity_controller(clk, reset_n, draw_done, ship_reg, asteroid_reg, shot_reg, entity, entity_state_out, state
 );
-
     // Parameters
     parameter ENTITY_SIZE       = 34,
               MAX_ASTEROIDS     = 5,
               MAX_SHOTS         = 10,
               MAX_SHIPS         = 1;
+
+    input clk;
+    input reset_n;
+    input [2:0] draw_done;
+    input [ENTITY_SIZE-1:0]ship_reg;
+    input [MAX_ASTEROIDS-1:0][ENTITY_SIZE-1:0] asteroid_reg;
+    input [MAX_SHOTS-1:0][ENTITY_SIZE-1:0] shot_reg;
+
+    output reg [ENTITY_SIZE-1:0] entity;
+    output [2:0] entity_state_out;
+    output [2:0] state;
 
     // Counters
     integer ship_counter = 0,
@@ -131,11 +142,12 @@ module entity_controller(
 
     // Output assignments
     assign entity_state_out = entity_state;
+    assign state = current_state;
 
-    localparam S_DRAW       = 0,
-               S_DRAW_WAIT  = 1,
-               S_INC        = 2,
-               S_RESET      = 3;
+    localparam S_DRAW       = 3'd0,
+               S_DRAW_WAIT  = 3'd1,
+               S_INC        = 3'd2,
+               S_RESET      = 3'd3;
 
     localparam D_SHIP       = 3'b100,
                D_ASTEROID   = 3'b010,
@@ -164,7 +176,7 @@ module entity_controller(
             S_RESET: begin
                 next_state = S_DRAW;
             end
-            default: next_state <= S_RESET;
+            default: next_state = S_RESET;
         endcase
     end // state_table
 
@@ -234,3 +246,51 @@ module entity_controller(
     end
 endmodule
 
+module test_draw_controller(
+    input clk,
+    input reset_n,
+
+    output [9:0] x,
+    output [9:0] y,
+    output [2:0] color,
+    output writeOut
+);
+    parameter ENTITY_SIZE = 34,
+              MAX_ASTEROIDS = 1,
+              MAX_SHOTS = 1,
+              MAX_SHIPS = 1;
+
+    wire [2:0] w_state;
+
+    reg [ENTITY_SIZE-1:0] ship;
+    reg [MAX_ASTEROIDS-1:0][ENTITY_SIZE-1:0] asteroids;
+    reg [MAX_SHOTS-1:0][ENTITY_SIZE-1:0] shots;
+
+    draw_controller #(
+        .ENTITY_SIZE(ENTITY_SIZE),
+        .MAX_ASTEROIDS(MAX_ASTEROIDS),
+        .MAX_SHOTS(MAX_SHOTS),
+        .MAX_SHIPS(MAX_SHIPS)
+    ) dc(
+        .clk(clk),
+        .reset_n(reset_n),
+        .ship_reg(ship),
+        .asteroid_reg(asteroids),
+        .shot_reg(shots),
+
+        .x(x),
+        .y(y),
+        .color(color),
+        .plot(writeOut),
+        .state(w_state)
+    );
+
+    always@(posedge clk) begin
+        if (reset_n) begin
+            ship <= 34'b1000000000000000000000000000001000;
+            shots <= 0;
+            asteroids <= 0;
+        end
+    end
+    
+endmodule

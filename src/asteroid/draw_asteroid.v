@@ -31,7 +31,7 @@ module draw_asteroid(
         .plot_out(writeEn),
         .x_pix(x),
         .y_pix(y),
-        .address_out(address),
+        .address_out(w_address),
         .color(color),
         .draw_done(draw_done)
     );

@@ -47,7 +47,8 @@ module draw_sprite(
         .sub_y(w_sub_y),
         .reset_x(w_reset_x),
         .reset_y(w_reset_y),
-        .plot_out(w_plot)
+        .plot_out(w_plot),
+        .draw_done(draw_done)
     );
 
     draw_datapath datapath(
@@ -66,7 +67,6 @@ module draw_sprite(
         .y_count(w_y_count),
         .address_out(address_out),
         .plot_out(plot_out),
-        .draw_done(),
         .x_pix(x_pix),
         .y_pix(y_pix),
         .color(color)
@@ -88,10 +88,7 @@ module sprite_draw_controller(
     output reg reset_x,
     output reg reset_y,
     output reg plot_out,
-    output reg draw_done,
-
-    // debug
-    output [2:0] state
+    output reg draw_done
 );
 
     reg [2:0] current_state, next_state;
@@ -153,7 +150,7 @@ module sprite_draw_controller(
             S_RESET:begin
                 reset_x = 1'b1;
                 reset_y = 1'b1;
-                draw_done = 1'b1;
+                draw_done <= 1'b1;
             end
         endcase
     end
