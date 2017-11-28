@@ -56,7 +56,7 @@ module draw_sprite(
         .state(state_out)
     );
 
-    draw_datapath datapath(
+    draw_datapath #(.sprite_size(sprite_size)) datapath(
         .clk(clk),
         .reset_n(reset_n),
         .x(x_pos),
@@ -147,7 +147,7 @@ module sprite_draw_controller(
 
         case(current_state)
             S_PLOT: begin
-                plot_out = 1'b1;
+                plot_out = plot;
             end
             S_X: begin
                 sub_x = 1'b1;
@@ -168,7 +168,7 @@ module sprite_draw_controller(
     always@(posedge clk)
     begin: state_FFs
         if(reset_n)
-            current_state <= S_WAIT;
+            current_state <= S_RESET;
         else
             current_state <= next_state;
     end // state_FFs

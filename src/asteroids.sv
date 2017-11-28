@@ -58,13 +58,21 @@ module asteroids(
     localparam ENTITY_SIZE = 34;
     // Set Counts Parameters
     localparam MAX_SHIPS        = 1,
-               MAX_ASTEROIDS    = 10,
-               MAX_SHOTS        = 10;
+               MAX_ASTEROIDS    = 3,
+               MAX_SHOTS        = 3;
 
     // Entity registers
-    reg [ENTITY_SIZE-1:0] ship;
+    reg [ENTITY_SIZE-1:0] ship = 34'b1000000000000000000000000000000001;
     reg [MAX_ASTEROIDS-1:0][ENTITY_SIZE-1:0] asteroids;
     reg [MAX_SHOTS-1:0][ENTITY_SIZE-1:0] shots;
+
+    assign asteroids[0] = 34'b1_000_00_00_0000110010_0000000000_000001;
+    assign asteroids[1] = 34'b1_000_00_00_0001100110_0001100110_000001;
+    assign asteroids[2] = 0;
+
+    assign shots[0] = 34'b1_000_00_00_0000000000_0001100110_000001;
+    assign shots[1] = 34'b1_000_00_00_0001100110_0000000000_000001;
+    assign shots[2] = 0;
 
     wire [5:0] w_ship_direction;
 
@@ -106,15 +114,31 @@ module asteroids(
         .MAX_ASTEROIDS(MAX_ASTEROIDS)
     )dc(
         .clk(CLOCK_50),
-        .ship_reg(ship),
-        .asteroid_reg(asteroids),
-        .shot_reg(shots),
+        .ship(ship),
+        .asteroids(asteroids),
+        .shots(shots),
 
         .x(x),
         .y(y),
         .color(color),
         .plot(writeEn)
     );
+    
+/*
+    draw_ship test_draw_ship(
+        .clk(CLOCK_50),
+        .x_pos(ship[15:6]),
+        .y_pos(ship[25:16]),
+        .plot(1'b1),
+        .reset_n(reset_n),
+        .direction(ship[5:0]),
+
+        .x(x),
+        .y(y),
+        .writeEn(writeEn),
+        .color(color)
+    );
+    */
 
 	always @ (posedge move_clk or posedge reset_n) begin
 		if (reset_n) begin
@@ -130,9 +154,9 @@ module asteroids(
 		end
 		else if (delta_y) begin
 			if (sign_y)
-				ship[25:16] <= ship[25:16]- 1;
+				ship[25:16] <= ship[25:16] - 1;
 			else
-				ship[25:16] <= ship[25:16]+ 1;
+				ship[25:16] <= ship[25:16] + 1;
 		end
         ship[5:0] <= w_ship_direction;
 	end

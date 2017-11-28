@@ -27,7 +27,6 @@ module draw_ship(
     reg [2:0] sprite_data;
     assign mif_data = w_data;
     assign mif_address = w_address;
-    assign color = 3'b111;
 
     draw_sprite #(.sprite_size(31)) ds(
         .clk(clk),
@@ -41,7 +40,7 @@ module draw_ship(
         .x_pix(x),
         .y_pix(y),
         .address_out(w_address),
-        .color(),
+        .color(color),
         .draw_done(draw_done),
         .state_out(state)
     );
