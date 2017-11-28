@@ -70,11 +70,8 @@ module asteroids(
     assign asteroids[1] = 34'b1_000_00_00_0001100110_0001100110_000001;
     assign asteroids[2] = 0;
 
-    assign shots[0] = 34'b1_000_00_00_0000000000_0001100110_000001;
-    assign shots[1] = 34'b1_000_00_00_0001100110_0000000000_000001;
-    assign shots[2] = 0;
-
     wire [5:0] w_ship_direction;
+    wire [MAX_SHOTS-1:0][ENTITY_SIZE-1:0] shots_data;
 
 	move_rate_divider mv_div(
 		.clk(CLOCK_50),
@@ -105,6 +102,21 @@ module asteroids(
 		.sign_x(sign_x),
 		.sign_y(sign_y)
 	);
+
+    // Shot controller
+    shot_controller sc(
+        .clk(move_clk),
+        .shoot(~KEY[2]),
+        .reset_n(reset_n),
+        .delete_shot(1'b0),
+        .shot_address(1'b0),
+        .entity_byte(3'b000),
+        .direction({ship[2:0], ship[5:3]}),
+        .xtip(ship[15:6]),
+        .ytip(ship[25:16]),
+
+        .shots_data(shots_data)
+    );
 
     // Draw controller for all entities
     draw_controller #(
@@ -159,5 +171,6 @@ module asteroids(
 				ship[25:16] <= ship[25:16] + 1;
 		end
         ship[5:0] <= w_ship_direction;
+        shots <= shots_data;
 	end
 endmodule
