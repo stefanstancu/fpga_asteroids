@@ -15,7 +15,8 @@ module draw_ship(
     output [9:0] y,
     output writeEn,
     output [2:0] color,
-    output draw_done
+    output draw_done,
+    output [2:0] state
 );
 
     wire [9:0] w_address;
@@ -36,7 +37,8 @@ module draw_ship(
         .y_pix(y),
         .address_out(w_address),
         .color(color),
-        .draw_done(draw_done)
+        .draw_done(draw_done),
+        .state_out(state)
     );
 
     sprite_mem32x32 mem0(
