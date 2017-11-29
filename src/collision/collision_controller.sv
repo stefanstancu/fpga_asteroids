@@ -1,4 +1,3 @@
-
 module collision_controller #(parameter
                               MAX_SHOTS        = 3,
                               ENTITY_SIZE      = 34,
@@ -21,14 +20,21 @@ module collision_controller #(parameter
 
     //if ship+asteroid
     for(i=0; i<MAX_ASTEROIDS;i=i+1) begin
-      if(/*INSERT SOME BLACK MAGIC HERE*/)begin
+      if(asteroids[i][15:6]+10'd22 + 10'd5 > 10'd22
+        && asteroids[i][15:6]+5'd5 < ship [15:6] + 10'd5 + 10'd22
+        && asteroids[i][25:16]+10'd22 + 10'd5 > 10'd22
+        && asteroids[i][25:16]+5'd5 < ship [25:16] + 10'd5 + 10'd22) begin
         /*lose life*/
       end
     end
-    //if asteroid+ship
+
+    //if asteroid+shot
     for(i=0; i<MAX_ASTEROIDS;i=i+1) begin
       for(j=0; j<MAX_SHOTS;j=j+1) begin
-          if(/*INSERT SOME BLACK MAGIC HERE*/)begin
+      if(asteroids[i][15:6]+10'd2 + 10'd5 > 10'd2
+        && asteroids[i][15:6]+5'd5 < ship [15:6] + 10'd5 + 10'd2
+        && asteroids[i][25:16]+10'd2 + 10'd5 > 10'd2
+        && asteroids[i][25:16]+5'd5 < ship [25:16] + 10'd5 + 10'd2) begin
           delete_shot = 1'b1;
           shot_address = j;
           delete_asteroid = 1'b1;
@@ -56,3 +62,8 @@ endmodule
 
 //0-320 x min and max
 //0-240 y min and max
+
+//add 5 to ship
+
+//32x32
+22
