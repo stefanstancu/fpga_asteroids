@@ -1,6 +1,6 @@
 // ECE241 Final Project
 // Stefan Stancu 1003153026
-// Bianca Esanu 1003082139
+// Bianca Esanu  1003082139
 // *
 // * ASTEROIDS *
 // *
@@ -25,9 +25,9 @@ module asteroids(
     assign reset_n = ~KEY[0];
 
     wire [2:0] color;
-	wire [9:0] x;
-	wire [9:0] y;
-	wire writeEn;
+	  wire [9:0] x;
+	  wire [9:0] y;
+	  wire writeEn;
 
     wire move_clk;
     wire delta_x, delta_y, sign_x, sign_y;
@@ -58,7 +58,7 @@ module asteroids(
     localparam ENTITY_SIZE = 34;
     // Set Counts Parameters
     localparam MAX_SHIPS        = 1,
-               MAX_ASTEROIDS    = 3,
+               MAX_ASTEROIDS    = 4,
                MAX_SHOTS        = 3;
 
     // Entity registers
@@ -66,12 +66,9 @@ module asteroids(
     reg [MAX_ASTEROIDS-1:0][ENTITY_SIZE-1:0] asteroids;
     reg [MAX_SHOTS-1:0][ENTITY_SIZE-1:0] shots;
 
-    assign asteroids[0] = 34'b1_000_00_00_0000110010_0000000000_000001;
-    assign asteroids[1] = 34'b1_000_00_00_0001100110_0001100110_000001;
-    assign asteroids[2] = 0;
-
     wire [5:0] w_ship_direction;
     wire [MAX_SHOTS-1:0][ENTITY_SIZE-1:0] shots_data;
+    wire [MAX_ASTEROIDS-1:0][ENTITY_SIZE-1:0] asteroids_data;
 
 	rate_divider #(.rate(24'd2000000)) mv_div(
 		.clk(CLOCK_50),
@@ -118,6 +115,16 @@ module asteroids(
         .shots_data(shots_data)
     );
 
+    // Asteroids controller
+    asteroid_controller #(.ASTEROID_COUNT(MAX_ASTEROIDS)) ac(
+        .reset_n(reset_n),
+        .clk(move_clk),
+        .entity_byte(3'b000),
+        .delete_asteroid(1'b0),
+        .asteroid_address(asteroid_address),
+        .asteroids_data(asteroids_data)
+      );
+
     // Draw controller for all entities
     draw_controller #(
         .ENTITY_SIZE(ENTITY_SIZE),
@@ -135,7 +142,7 @@ module asteroids(
         .color(color),
         .plot(writeEn)
     );
-    
+
 /*
     draw_ship test_draw_ship(
         .clk(CLOCK_50),
@@ -171,6 +178,9 @@ module asteroids(
 				ship[25:16] <= ship[25:16] + 1;
 		end
         ship[5:0] <= w_ship_direction;
-        shots <= shots_data;
 	end
+    always @ (posedge CLOCK_50) begin
+        shots <= shots_data;
+        asteroids <= asteroids_data;
+    end
 endmodule
