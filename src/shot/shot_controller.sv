@@ -1,4 +1,5 @@
 //`define SHOT_COUNT 10
+/*
 module test_shots #(parameter SHOT_COUNT = 10,
             ENTITY_SIZE = 34)
 				(input clk, output [SHOT_COUNT-1:0][ENTITY_SIZE-1:0] w_data);
@@ -19,12 +20,14 @@ module test_shots #(parameter SHOT_COUNT = 10,
 		.shots_data(w_data)
     );
 endmodule
-
+*/
 module shot_controller
 #(parameter SHOT_COUNT = 10,
-            ENTITY_SIZE = 34)
+            ENTITY_SIZE = 34,
+            SHOT_RATE = 40000000)
 (
   input clk,
+  input move_clk,
   input shoot,
   input reset_n,
   input delete_shot,
@@ -37,6 +40,14 @@ module shot_controller
   output reg [SHOT_COUNT-1:0][ENTITY_SIZE-1:0] shots_data
 );
 
+    wire can_shoot;
+
+    shoot_enabler enabler(
+        .clk(clk),
+        .reset_n(reset_n),
+        .shoot(shoot),
+        .can_shoot(can_shoot)
+    );
 
 	always@(posedge clk) begin
 
@@ -48,7 +59,7 @@ module shot_controller
 			shots_data[shot_address]<=0;
 		end
 
-		if (shoot) begin
+		if (can_shoot) begin
 			integer i;
 			for(i=0; i<SHOT_COUNT;i=i+1) begin
 
@@ -58,7 +69,6 @@ module shot_controller
 				end
 			end
 		end
-
 
 		for(integer i=0; i<SHOT_COUNT;i=i+1) begin
 
@@ -97,4 +107,48 @@ module shot_controller
 		end
 	end
 
+endmodule
+
+module shoot_enabler(
+    input clk,
+    input reset_n,
+    input shoot,
+
+    output can_shoot
+);
+    
+    localparam S_WAIT_FOR_SHOOT         = 0,
+               S_CAN_SHOOT              = 1,
+               S_WAIT_FOR_SHOOT_RELEASE = 2;
+
+    reg [2:0] current_state, next_state;
+
+    always @ (*) begin: state_table
+        case (current_state)
+            S_WAIT_FOR_SHOOT: begin
+                next_state <= shoot? S_CAN_SHOOT : S_WAIT_FOR_SHOOT;
+            end
+            S_CAN_SHOOT: begin
+                next_state <= shoot ? S_WAIT_FOR_SHOOT_RELEASE : S_WAIT_FOR_SHOOT;
+            end
+            S_WAIT_FOR_SHOOT_RELEASE: begin
+                next_state <= shoot ? S_WAIT_FOR_SHOOT_RELEASE : S_WAIT_FOR_SHOOT;
+            end
+        endcase
+    end // state_table
+
+    always @ (*) begin: data_out
+        case(current_state)
+            S_WAIT_FOR_SHOOT: can_shoot <= 1'b0;
+            S_CAN_SHOOT: can_shoot <= 1'b1;
+            S_WAIT_FOR_SHOOT_RELEASE: can_shoot <= 1'b0;
+        endcase
+    end // data
+    
+    always @ (posedge clk) begin
+        if (reset_n)
+            current_state <= S_WAIT_FOR_SHOOT;
+        else
+            current_state <= next_state;
+    end
 endmodule

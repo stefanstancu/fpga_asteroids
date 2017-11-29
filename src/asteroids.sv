@@ -152,7 +152,7 @@ module asteroids(
     );
     */
 
-	always @ (posedge move_clk or posedge reset_n) begin
+	always @ (posedge move_clk) begin
 		if (reset_n) begin
 			ship[15:6] <= 10'd0;
 			ship[25:16] <= 10'd0;
