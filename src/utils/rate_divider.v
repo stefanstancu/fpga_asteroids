@@ -1,4 +1,4 @@
-module move_rate_divider(
+module rate_divider(
     input clk,
     input reset_n,
 
@@ -6,16 +6,16 @@ module move_rate_divider(
     );
 
     reg [23:0] count;
-    localparam  division_rate = 24'd2000000;
+    parameter  rate = 24'd2000000;
 
     always @ (posedge clk) begin
         if(reset_n) begin
-            count <= division_rate;
+            count <= rate;
         end
         if (count > 0)
             count <= count - 1;
         else if (count == 0)
-            count <= division_rate;
+            count <= rate;
     end
 
     always @ ( * ) begin

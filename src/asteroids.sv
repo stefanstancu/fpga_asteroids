@@ -73,7 +73,7 @@ module asteroids(
     wire [5:0] w_ship_direction;
     wire [MAX_SHOTS-1:0][ENTITY_SIZE-1:0] shots_data;
 
-	move_rate_divider mv_div(
+	rate_divider #(.rate(24'd2000000)) mv_div(
 		.clk(CLOCK_50),
 		.reset_n(reset_n),
 
