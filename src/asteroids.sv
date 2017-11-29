@@ -66,10 +66,6 @@ module asteroids(
     reg [MAX_ASTEROIDS-1:0][ENTITY_SIZE-1:0] asteroids;
     reg [MAX_SHOTS-1:0][ENTITY_SIZE-1:0] shots;
 
-    //assign asteroids[0] = 34'b1_000_00_00_0000110010_0000000000_000001;
-    //assign asteroids[1] = 34'b1_000_00_00_0001100110_0001100110_000001;
-    //assign asteroids[2] = 0;
-
     wire [5:0] w_ship_direction;
     wire [MAX_SHOTS-1:0][ENTITY_SIZE-1:0] shots_data;
     wire [MAX_ASTEROIDS-1:0][ENTITY_SIZE-1:0] asteroids_data;
@@ -120,13 +116,13 @@ module asteroids(
     );
 
     // Asteroids controller
-    asteroids_controller u1(
+    asteroid_controller #(.ASTEROID_COUNT(MAX_ASTEROIDS)) ac(
         .reset_n(reset_n),
-        .clk(clk),
-      .entity_byte(3'b000),
+        .clk(move_clk),
+        .entity_byte(3'b000),
         .delete_asteroid(1'b0),
         .asteroid_address(asteroid_address),
-       .asteroids_data(asteroids_data)
+        .asteroids_data(asteroids_data)
       );
 
     // Draw controller for all entities
@@ -182,7 +178,9 @@ module asteroids(
 				ship[25:16] <= ship[25:16] + 1;
 		end
         ship[5:0] <= w_ship_direction;
-        shots <= shots_data;
-        asteroids<=asteroids_data;
 	end
+    always @ (posedge CLOCK_50) begin
+        shots <= shots_data;
+        asteroids <= asteroids_data;
+    end
 endmodule
