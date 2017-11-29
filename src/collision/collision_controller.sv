@@ -59,11 +59,3 @@ module collision_controller #(parameter
 	end
 
 endmodule
-
-//0-320 x min and max
-//0-240 y min and max
-
-//add 5 to ship
-
-//32x32
-22
