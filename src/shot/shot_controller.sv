@@ -1,8 +1,8 @@
-//`define SHOT_COUNT 10
+//`define MAX_SHOTS 10
 /*
-module test_shots #(parameter SHOT_COUNT = 10,
+module test_shots #(parameter MAX_SHOTS = 10,
             ENTITY_SIZE = 34)
-				(input clk, output [SHOT_COUNT-1:0][ENTITY_SIZE-1:0] w_data);
+				(input clk, output [MAX_SHOTS-1:0][ENTITY_SIZE-1:0] w_data);
 
 
 	shot_controller u1(
@@ -22,7 +22,7 @@ module test_shots #(parameter SHOT_COUNT = 10,
 endmodule
 */
 module shot_controller
-#(parameter SHOT_COUNT = 10,
+#(parameter MAX_SHOTS = 10,
             ENTITY_SIZE = 34,
             SHOT_RATE = 40000000)
 (
@@ -31,13 +31,13 @@ module shot_controller
   input shoot,
   input reset_n,
   input delete_shot,
-  input shot_address,
+  input [9:0] shot_address,
   input [2:0] entity_byte,
   input [5:0] direction,
   input [9:0] xtip,
   input [9:0] ytip,
 
-  output reg [SHOT_COUNT-1:0][ENTITY_SIZE-1:0] shots_data
+  output reg [MAX_SHOTS-1:0][ENTITY_SIZE-1:0] shots_data
 );
 
     wire can_shoot;
@@ -52,7 +52,7 @@ module shot_controller
 	always@(posedge clk) begin
 
 		if (reset_n) begin
-			shots_data <= (SHOT_COUNT)*34'd0;
+			shots_data <= (MAX_SHOTS)*34'd0;
 		end
 
 		if (delete_shot) begin
@@ -61,7 +61,7 @@ module shot_controller
 
 		if (can_shoot) begin
 			integer i;
-			for(i=0; i<SHOT_COUNT;i=i+1) begin
+			for(i=0; i<MAX_SHOTS;i=i+1) begin
 
 				if(shots_data[i][33]==1'b0) begin
 					shots_data[i]<={1'b1, entity_byte [2:0], direction [4:3], direction [1:0], ytip [9:0], xtip [9:0], direction [5:0]};
@@ -70,7 +70,7 @@ module shot_controller
 			end
 		end
 
-		for(integer i=0; i<SHOT_COUNT;i=i+1) begin
+		for(integer i=0; i<MAX_SHOTS;i=i+1) begin
 
 			if (shots_data[i][33]==1'b1) begin
 
@@ -116,7 +116,7 @@ module shoot_enabler(
 
     output can_shoot
 );
-    
+
     localparam S_WAIT_FOR_SHOOT         = 0,
                S_CAN_SHOOT              = 1,
                S_WAIT_FOR_SHOOT_RELEASE = 2;
@@ -144,7 +144,7 @@ module shoot_enabler(
             S_WAIT_FOR_SHOOT_RELEASE: can_shoot <= 1'b0;
         endcase
     end // data
-    
+
     always @ (posedge clk) begin
         if (reset_n)
             current_state <= S_WAIT_FOR_SHOOT;
