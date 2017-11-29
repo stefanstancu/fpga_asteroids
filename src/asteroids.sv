@@ -63,6 +63,7 @@ module asteroids(
 
     // Entity registers
     reg [ENTITY_SIZE-1:0] ship = 34'b1000000000000000000000000000000001;
+    reg [ENTITY_SIZE-1:0] ship_data = 34'b1000000000000000000000000000000001;
     reg [MAX_ASTEROIDS-1:0][ENTITY_SIZE-1:0] asteroids;
     reg [MAX_SHOTS-1:0][ENTITY_SIZE-1:0] shots;
 
@@ -161,25 +162,26 @@ module asteroids(
 
 	always @ (posedge move_clk) begin
 		if (reset_n) begin
-			ship[15:6] <= 10'd0;
-			ship[25:16] <= 10'd0;
-            ship[5:0] <= 6'b000001;
+			ship_data[15:6] <= 10'd0;
+			ship_data[25:16] <= 10'd0;
+            ship_data[5:0] <= 6'b000001;
 		end
 		else if (delta_x) begin
 			if (sign_x)
-				ship[15:6] <= ship[15:6] - 1;
+				ship_data[15:6] <= ship[15:6] - 1;
 			else
-				ship[15:6] <= ship[15:6] + 1;
+				ship_data[15:6] <= ship[15:6] + 1;
 		end
 		else if (delta_y) begin
 			if (sign_y)
-				ship[25:16] <= ship[25:16] - 1;
+				ship_data[25:16] <= ship[25:16] - 1;
 			else
-				ship[25:16] <= ship[25:16] + 1;
+				ship_data[25:16] <= ship[25:16] + 1;
 		end
-        ship[5:0] <= w_ship_direction;
+        ship_data[5:0] <= w_ship_direction;
 	end
     always @ (posedge CLOCK_50) begin
+        ship <= ship_data;
         shots <= shots_data;
         asteroids <= asteroids_data;
     end
