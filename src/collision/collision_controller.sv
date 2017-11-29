@@ -1,19 +1,19 @@
 module collision_controller #(parameter
-                              MAX_SHOTS        = 3,
+                              MAX_SHOTS        = 10,
                               ENTITY_SIZE      = 34,
-                              MAX_ASTEROIDS    = 3,
+                              MAX_ASTEROIDS    = 8,
                               MAX_SHIPS        = 1)
 (
 	input clk,
 	input reset_n,
-	input reg [ENTITY_SIZE-1:0] ship = 34'b1000000000000000000000000000000001,
-  input reg [MAX_ASTEROIDS-1:0][ENTITY_SIZE-1:0] asteroids,
+	input reg [ENTITY_SIZE-1:0] ship,
+input reg [MAX_ASTEROIDS-1:0][ENTITY_SIZE-1:0] asteroids,
   input reg [MAX_SHOTS-1:0][ENTITY_SIZE-1:0] shots,
 
-  output delete_shot,
-  output delete_asteroid,
-  output [9:0] asteroid_address,
-  output [9:0] shot_address
+  output reg delete_shot,
+  output reg delete_asteroid,
+  output reg [9:0] asteroid_address,
+  output reg [9:0] shot_address
 );
   integer i,j;
 	always @(posedge clk) begin
@@ -29,7 +29,7 @@ module collision_controller #(parameter
     end
 
     //if asteroid+shot
-    for(i=0; i<MAX_ASTEROIDS;i=i+1) begin
+    /*for(i=0; i<MAX_ASTEROIDS;i=i+1) begin
       for(j=0; j<MAX_SHOTS;j=j+1) begin
       if(asteroids[i][15:6]+10'd2 + 10'd5 > 10'd2
         && asteroids[i][15:6]+5'd5 < ship [15:6] + 10'd5 + 10'd2
@@ -42,18 +42,19 @@ module collision_controller #(parameter
           end
       end
     end
+    */
 
     //shot out of bounds
     for(i=0; i<MAX_SHOTS;i=i+1) begin
         //out of x bounds
         if(shots[i][15:6]<10'd0 || shots[i][15:6]>10'd320) begin
-          delete_shot = 1'b1;
-          shot_address = i;
+          delete_shot <= 1'b1;
+          shot_address <= i;
         end
         //out of bounds y
         if(shots[i][25:16]<10'd0 || shots[i][25:16]>10'd240) begin
-          delete_shot = 1'b1;
-          shot_address = i;
+          delete_shot <= 1'b1;
+          shot_address <= i;
         end
     end
 	end

@@ -58,14 +58,17 @@ module asteroids(
     localparam ENTITY_SIZE = 34;
     // Set Counts Parameters
     localparam MAX_SHIPS        = 1,
-               MAX_ASTEROIDS    = 4,
-               MAX_SHOTS        = 3;
+               MAX_ASTEROIDS    = 8,
+               MAX_SHOTS        = 10;
 
     // Entity registers
     reg [ENTITY_SIZE-1:0] ship = 34'b1000000000000000000000000000000001;
     reg [ENTITY_SIZE-1:0] ship_data = 34'b1000000000000000000000000000000001;
     reg [MAX_ASTEROIDS-1:0][ENTITY_SIZE-1:0] asteroids;
     reg [MAX_SHOTS-1:0][ENTITY_SIZE-1:0] shots;
+
+    wire del_asteroid, del_shot;
+    wire [9:0] del_addr_as, del_addr_shot;
 
     wire [5:0] w_ship_direction;
     wire [MAX_SHOTS-1:0][ENTITY_SIZE-1:0] shots_data;
@@ -106,8 +109,8 @@ module asteroids(
         .clk(move_clk),
         .shoot(~KEY[2]),
         .reset_n(reset_n),
-        .delete_shot(1'b0),
-        .shot_address(1'b0),
+        .delete_shot(del_shot),
+        .shot_address(del_addr_shot),
         .entity_byte(3'b000),
         .direction({ship[2:0], ship[5:3]}),
         .xtip(ship[15:6]),
@@ -121,10 +124,28 @@ module asteroids(
         .reset_n(reset_n),
         .clk(move_clk),
         .entity_byte(3'b000),
-        .delete_asteroid(1'b0),
-        .asteroid_address(asteroid_address),
+        .delete_asteroid(del_asteroid),
+        .asteroid_address(del_addr_as),
         .asteroids_data(asteroids_data)
       );
+
+    collision_controller #(
+        .MAX_SHOTS(MAX_SHOTS),
+        .MAX_ASTEROIDS(MAX_ASTEROIDS),
+        .MAX_SHIPS(MAX_SHIPS),
+        .ENTITY_SIZE(ENTITY_SIZE))
+        cc (
+            .clk(CLOCK_50),
+            .reset_n(reset_n),
+            .ship(ship),
+            .asteroids(asteroids),
+            .shots(shots),
+
+            .delete_shot(del_shot),
+            .delete_asteroid(del_asteroid),
+            .shot_address(del_addr_shot),
+            .asteroid_address(del_addr_as)
+        );
 
     // Draw controller for all entities
     draw_controller #(

@@ -6,7 +6,7 @@ module asteroid_controller
   input shoot,
   input reset_n,
   input delete_asteroid,
-  input asteroid_address,
+  input [9:0]asteroid_address,
   input [2:0] entity_byte,
 
   output reg [ASTEROID_COUNT-1:0][ENTITY_SIZE-1:0] asteroids_data
@@ -14,14 +14,18 @@ module asteroid_controller
   reg [9:0] x_pos;
   reg [9:0] y_pos;
   reg [5:0] slope;
-  reg [3:0][25:0] spawns;
+  reg [ASTEROID_COUNT-1:0][25:0] spawns;
 
 
 //assign spawns[x],={(10 bits of y direction),(10 bits of x direction),(5 bits of slope)};
     assign spawns[0] = {10'd0, 10'd50, 6'b111000};
     assign spawns[1] = {10'd120,10'd50, 6'b101000};
     assign spawns[2] = {10'd50, 10'd220, 6'b000101};
-    assign spawns[3] = {10'd50, 10'd0, 6'b000001};
+    assign spawns[3] = {10'd78, 10'd300, 6'b010101};
+    assign spawns[4] = {10'd50, 10'd180, 6'b011001};
+    assign spawns[5] = {10'd95, 10'd21, 6'b110101};
+    assign spawns[6] = {10'd50, 10'd70, 6'b010011};
+    assign spawns[7] = {10'd100, 10'd0, 6'b111001};
 
 	always@(posedge clk)
 	begin
@@ -40,7 +44,7 @@ module asteroid_controller
 
 		else begin
 			integer j;
-			for(j=0; j<4;j=j+1) begin
+			for(j=0; j<ASTEROID_COUNT;j=j+1) begin
 			//integer i;
             //for(i=0; i<ASTEROID_COUNT;i=i+1) begin
 				  if(asteroids_data[j][33]==1'b0) begin
