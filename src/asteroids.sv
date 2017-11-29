@@ -1,6 +1,6 @@
 // ECE241 Final Project
 // Stefan Stancu 1003153026
-// Bianca Esanu 1003082139
+// Bianca Esanu  1003082139
 // *
 // * ASTEROIDS *
 // *
@@ -72,6 +72,7 @@ module asteroids(
 
     wire [5:0] w_ship_direction;
     wire [MAX_SHOTS-1:0][ENTITY_SIZE-1:0] shots_data;
+    wire [MAX_ASTEROIDS-1:0][ENTITY_SIZE-1:0] asteroids_data;
 
 	rate_divider #(.rate(24'd2000000)) mv_div(
 		.clk(CLOCK_50),
@@ -125,7 +126,7 @@ module asteroids(
       .entity_byte(3'b000),
         .delete_asteroid(1'b0),
         .asteroid_address(asteroid_address),
-       .asteroids_data(asteroids)
+       .asteroids_data(asteroids_data)
       );
 
     // Draw controller for all entities
@@ -182,5 +183,6 @@ module asteroids(
 		end
         ship[5:0] <= w_ship_direction;
         shots <= shots_data;
+        asteroids<=asteroids_data;
 	end
 endmodule
