@@ -107,18 +107,17 @@ module draw_controller(clk, reset_n, ship, asteroids, shots, x, y, color, plot, 
     );
 
     // Draw shot
-    draw_sprite #(.sprite_size(5'd2)) d_shot(
+    draw_shot d_shot(
         .clk(clk),
-        .reset_n(reset_n),
-        .plot(w_entity[33]),
         .x_pos(w_entity[15:6]),
         .y_pos(w_entity[25:16]),
-        .sprite_pixel_data(3'b111),
+        .plot(w_entity[33]),
+        .reset_n(reset_n),
+        .sprite_sel(w_entity[32:30]),
 
-        .plot_out(w_writeEn[0]),
-        .x_pix(w_x[0]),
-        .y_pix(w_y[0]),
-        .address_out(),
+        .x(w_x[0]),
+        .y(w_y[0]),
+        .writeEn(w_writeEn[0]),
         .color(w_color[0]),
         .draw_done(w_draw_done[0])
     );
